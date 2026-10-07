@@ -1,0 +1,93 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Thư viện sách cá nhân' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-cream-100/90 dark:bg-[#1a1a1a]/90 backdrop-blur-md border-b border-cream-200 dark:border-[#333]">
+      <nav class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 group">
+          <div class="w-9 h-9 bg-forest-600 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <span class="font-serif text-lg font-semibold text-ink dark:text-cream-100 group-hover:text-forest-600 dark:group-hover:text-cream-300 transition-colors">
+            Thư Viện Của Mạnh
+          </span>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <a href="/bookshelf" class="px-4 py-2 text-sm font-medium text-ink-light dark:text-cream-300 hover:text-forest-600 dark:hover:text-white transition-colors rounded-lg hover:bg-cream-200 dark:hover:bg-[#333]">
+            Kệ sách
+          </a>
+
+          <!-- Dark mode toggle -->
+          <button
+            id="theme-toggle"
+            class="p-2 rounded-lg text-ink-light dark:text-cream-300 hover:bg-cream-200 dark:hover:bg-[#333] transition-colors"
+            aria-label="Chuyển chế độ sáng/tối"
+          >
+            <svg class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <svg class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-cream-200 dark:border-[#333] mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-center">
+        <p class="font-serif text-ink-lighter dark:text-cream-300/60 text-sm italic">
+          "Đọc sách là cuộc trò chuyện với những bộ óc tốt nhất của các thế kỷ trước."
+        </p>
+        <p class="text-ink-lighter dark:text-cream-300/40 text-xs mt-2">
+          &mdash; Descartes
+        </p>
+        <p class="text-ink-lighter dark:text-cream-300/40 text-xs mt-4">
+          Thư viện cá nhân &middot; {new Date().getFullYear()}
+        </p>
+      </div>
+    </footer>
+
+    <!-- Dark mode script -->
+    <script is:inline>
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+
+      // Check saved preference or system preference
+      if (localStorage.getItem('theme') === 'dark' ||
+          (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        html.classList.add('dark');
+      }
+
+      toggle?.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>

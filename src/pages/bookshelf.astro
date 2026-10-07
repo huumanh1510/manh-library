@@ -1,0 +1,98 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BookCard from '@/components/BookCard.astro';
+import { getCollection } from 'astro:content';
+
+const allEntries = await getCollection('books');
+const allBooks = allEntries.filter(e => !e.id.includes('/'));
+
+const categories = [...new Set(allBooks.map(b => b.data.category).filter(Boolean))];
+
+const statusOrder: Record<string, number> = { reading: 0, 'to-read': 1, completed: 2 };
+const sortedBooks = allBooks.sort((a, b) => statusOrder[a.data.status] - statusOrder[b.data.status]);
+
+function bookSlug(entry: typeof allBooks[0]): string {
+  return entry.id;
+}
+---
+
+<BaseLayout title="Kệ Sách — Thư Viện Của Mạnh">
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+    <div class="mb-10">
+      <h1 class="font-serif text-3xl sm:text-4xl font-bold text-ink dark:text-cream-100 mb-2">
+        Kệ sách
+      </h1>
+      <p class="text-ink-lighter dark:text-cream-300/60 text-lg">
+        Tất cả {allBooks.length} cuốn sách trong bộ sưu tập
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-8" id="category-filters">
+      <button
+        class="filter-btn active px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-forest-600 text-white"
+        data-category="all"
+      >
+        Tất cả
+      </button>
+      {categories.map(cat => (
+        <button
+          class="filter-btn px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-cream-200 dark:bg-[#333] text-ink-light dark:text-cream-300 hover:bg-forest-600 hover:text-white"
+          data-category={cat}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="book-grid">
+      {sortedBooks.map(book => (
+        <div class="book-item" data-category={book.data.category}>
+          <BookCard
+            title={book.data.title}
+            author={book.data.author || ''}
+            cover={book.data.cover}
+            description={book.data.description || ''}
+            category={book.data.category || 'Khác'}
+            slug={bookSlug(book)}
+            status={book.data.status}
+            currentChapter={book.data.currentChapter}
+            totalChapters={book.data.totalChapters || 0}
+            readingTime={book.data.readingTime}
+          />
+        </div>
+      ))}
+    </div>
+
+    {allBooks.length === 0 && (
+      <div class="text-center py-20">
+        <svg class="w-16 h-16 text-cream-300 dark:text-[#444] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <p class="font-serif text-xl text-ink-lighter dark:text-cream-300/60">
+          Chưa có sách nào trong kệ
+        </p>
+      </div>
+    )}
+  </section>
+
+  <script is:inline>
+    const filters = document.querySelectorAll('.filter-btn');
+    const bookItems = document.querySelectorAll('.book-item');
+
+    filters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filters.forEach(f => {
+          f.classList.remove('active', 'bg-forest-600', 'text-white');
+          f.classList.add('bg-cream-200', 'text-ink-light');
+        });
+        btn.classList.add('active', 'bg-forest-600', 'text-white');
+        btn.classList.remove('bg-cream-200', 'text-ink-light');
+
+        const category = btn.dataset.category;
+        bookItems.forEach(item => {
+          item.style.display = (category === 'all' || item.dataset.category === category) ? '' : 'none';
+        });
+      });
+    });
+  </script>
+</BaseLayout>

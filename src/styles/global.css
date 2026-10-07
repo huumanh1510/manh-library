@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans text-ink bg-cream-100 antialiased;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .dark body {
+    @apply bg-[#1a1a1a] text-cream-200;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-cream-200;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-[#2a2a2a];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-cream-300 rounded-full;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-[#444] rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-lighter;
+  }
+}
+
+@layer components {
+  /* Reading content typography */
+  .prose-reading {
+    @apply font-serif text-lg leading-relaxed;
+  }
+
+  .prose-reading p {
+    @apply mb-6;
+  }
+
+  .prose-reading h2 {
+    @apply font-serif text-2xl font-semibold mt-12 mb-4;
+  }
+
+  .prose-reading h3 {
+    @apply font-serif text-xl font-semibold mt-8 mb-3;
+  }
+
+  .prose-reading blockquote {
+    @apply border-l-4 border-forest-600 pl-6 italic text-ink-light my-8;
+  }
+
+  .dark .prose-reading blockquote {
+    @apply border-cream-300 text-cream-300;
+  }
+
+  .prose-reading ul, .prose-reading ol {
+    @apply ml-6 mb-6;
+  }
+
+  .prose-reading li {
+    @apply mb-2;
+  }
+
+  .prose-reading strong {
+    @apply font-semibold;
+  }
+
+  .prose-reading em {
+    @apply italic;
+  }
+
+  /* Book card */
+  .book-card {
+    @apply bg-white rounded-xl shadow-sm border border-cream-200 overflow-hidden
+           transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+  }
+
+  .dark .book-card {
+    @apply bg-[#252525] border-[#333];
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 bg-forest-600 text-white
+           rounded-lg font-medium transition-all duration-200
+           hover:bg-forest-700 active:bg-forest-800;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3 border-2 border-forest-600
+           text-forest-600 rounded-lg font-medium transition-all duration-200
+           hover:bg-forest-600 hover:text-white;
+  }
+
+  .dark .btn-secondary {
+    @apply border-cream-300 text-cream-200 hover:bg-cream-300 hover:text-ink;
+  }
+}
+
+/* Selection highlight color */
+::selection {
+  @apply bg-forest-600/20;
+}
+
+.dark ::selection {
+  @apply bg-cream-300/30;
+}

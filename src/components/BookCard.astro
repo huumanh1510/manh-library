@@ -1,0 +1,96 @@
+---
+interface Props {
+  title: string;
+  author: string;
+  cover?: string;
+  description: string;
+  category: string;
+  slug: string;
+  status: 'reading' | 'completed' | 'to-read';
+  currentChapter?: number;
+  totalChapters: number;
+  readingTime?: string;
+}
+
+const { title, author, cover, description, category, slug, status, currentChapter = 0, totalChapters, readingTime } = Astro.props;
+
+const progress = totalChapters > 0 ? Math.round((currentChapter / totalChapters) * 100) : 0;
+
+const statusLabel: Record<string, string> = {
+  'reading': 'Đang đọc',
+  'completed': 'Đã đọc xong',
+  'to-read': 'Muốn đọc',
+};
+
+const statusColor: Record<string, string> = {
+  'reading': 'bg-forest-600 text-white',
+  'completed': 'bg-cream-300 text-ink',
+  'to-read': 'bg-cream-200 text-ink-light',
+};
+---
+
+<a href={`/book/${slug}`} class="book-card group block">
+  <!-- Cover -->
+  <div class="aspect-[3/4] bg-cream-200 dark:bg-[#333] relative overflow-hidden">
+    {cover ? (
+      <img
+        src={cover}
+        alt={`Bìa sách ${title}`}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+      />
+    ) : (
+      <div class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-forest-600 to-forest-800">
+        <svg class="w-10 h-10 text-white/60 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span class="font-serif text-white text-sm font-medium leading-tight">{title}</span>
+        <span class="text-white/50 text-xs mt-1">{author}</span>
+      </div>
+    )}
+
+    <!-- Status badge -->
+    <span class={`absolute top-3 left-3 px-2.5 py-1 text-xs font-medium rounded-full ${statusColor[status]}`}>
+      {statusLabel[status]}
+    </span>
+  </div>
+
+  <!-- Info -->
+  <div class="p-4">
+    <p class="text-xs font-medium text-forest-600 dark:text-cream-300 uppercase tracking-wider mb-1">
+      {category}
+    </p>
+    <h3 class="font-serif text-base font-semibold text-ink dark:text-cream-100 leading-snug mb-1 group-hover:text-forest-600 dark:group-hover:text-cream-300 transition-colors">
+      {title}
+    </h3>
+    <p class="text-sm text-ink-light dark:text-cream-300/70 mb-3">
+      {author}
+    </p>
+
+    <!-- Progress bar (only for reading status) -->
+    {status === 'reading' && (
+      <div>
+        <div class="flex justify-between text-xs text-ink-lighter dark:text-cream-300/50 mb-1.5">
+          <span>Chương {currentChapter}/{totalChapters}</span>
+          <span>{progress}%</span>
+        </div>
+        <div class="w-full h-1.5 bg-cream-200 dark:bg-[#333] rounded-full overflow-hidden">
+          <div
+            class="h-full bg-forest-600 rounded-full transition-all duration-500"
+            style={`width: ${progress}%`}
+          />
+        </div>
+      </div>
+    )}
+
+    <!-- Reading time -->
+    {readingTime && status !== 'reading' && (
+      <p class="text-xs text-ink-lighter dark:text-cream-300/50 flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {readingTime}
+      </p>
+    )}
+  </div>
+</a>

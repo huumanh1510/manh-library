@@ -1,0 +1,161 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BookCard from '@/components/BookCard.astro';
+import { getCollection } from 'astro:content';
+
+const allEntries = await getCollection('books');
+
+// Only book index entries (no slash = top-level = book, with slash = chapter)
+const allBooks = allEntries.filter(e => !e.id.includes('/'));
+
+// Sort: reading first, then to-read, then completed
+const statusOrder: Record<string, number> = { reading: 0, 'to-read': 1, completed: 2 };
+const sortedBooks = allBooks.sort((a, b) => statusOrder[a.data.status] - statusOrder[b.data.status]);
+
+const readingBooks = sortedBooks.filter(b => b.data.status === 'reading');
+const recentBooks = sortedBooks.slice(0, 6);
+
+function bookSlug(entry: typeof allBooks[0]): string {
+  return entry.id;
+}
+---
+
+<BaseLayout title="Thư Viện Của Mạnh — Đọc sách online">
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-forest-900 via-forest-800 to-forest-600"></div>
+    <div class="absolute inset-0 opacity-10">
+      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="book-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M30 10v40M30 10c-3-2-7-3-11-3s-8 1-11 3v40c3-2 7-3 11-3s8 1 11 3m0-40c3-2 7-3 11-3s8 1 11 3v40c-3-2-7-3-11-3s-8 1-11 3" stroke="white" stroke-width="0.5" fill="none" opacity="0.3"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#book-pattern)" />
+      </svg>
+    </div>
+
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+      <div class="max-w-2xl">
+        <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+          Thư viện sách<br/>
+          <span class="text-cream-300">của riêng tôi</span>
+        </h1>
+        <p class="text-cream-200/80 text-lg sm:text-xl leading-relaxed mb-8 max-w-lg">
+          Nơi lưu giữ và đọc những cuốn sách yêu thích. Không quảng cáo, không phiền nhiễu — chỉ có bạn và trang sách.
+        </p>
+
+        <div class="flex flex-wrap gap-3">
+          {readingBooks.length > 0 ? (
+            <a href={`/book/${bookSlug(readingBooks[0])}`} class="inline-flex items-center gap-2 px-6 py-3 bg-white text-forest-800 rounded-lg font-medium transition-all duration-200 hover:bg-cream-100 hover:shadow-lg">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Tiếp tục đọc
+            </a>
+          ) : (
+            <span></span>
+          )}
+          <a href="/bookshelf" class="inline-flex items-center gap-2 px-6 py-3 border-2 border-white/30 text-white rounded-lg font-medium transition-all duration-200 hover:bg-white/10">
+            Xem kệ sách
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="mt-12 grid grid-cols-3 gap-4 max-w-md">
+        <div class="text-center">
+          <p class="font-serif text-2xl sm:text-3xl font-bold text-white">{allBooks.length}</p>
+          <p class="text-cream-200/60 text-xs sm:text-sm mt-1">Cuốn sách</p>
+        </div>
+        <div class="text-center">
+          <p class="font-serif text-2xl sm:text-3xl font-bold text-white">{readingBooks.length}</p>
+          <p class="text-cream-200/60 text-xs sm:text-sm mt-1">Đang đọc</p>
+        </div>
+        <div class="text-center">
+          <p class="font-serif text-2xl sm:text-3xl font-bold text-white">{allBooks.filter(b => b.data.status === 'completed').length}</p>
+          <p class="text-cream-200/60 text-xs sm:text-sm mt-1">Đã hoàn thành</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {readingBooks.length > 0 && (
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="font-serif text-2xl font-semibold text-ink dark:text-cream-100">
+            Đang đọc
+          </h2>
+          <p class="text-ink-lighter dark:text-cream-300/60 text-sm mt-1">
+            Những cuốn sách đang dang dở
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {readingBooks.map(book => (
+          <BookCard
+            title={book.data.title}
+            author={book.data.author || ''}
+            cover={book.data.cover}
+            description={book.data.description || ''}
+            category={book.data.category || 'Khác'}
+            slug={bookSlug(book)}
+            status={book.data.status}
+            currentChapter={book.data.currentChapter}
+            totalChapters={book.data.totalChapters || 0}
+            readingTime={book.data.readingTime}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h2 class="font-serif text-2xl font-semibold text-ink dark:text-cream-100">
+          Tất cả sách
+        </h2>
+        <p class="text-ink-lighter dark:text-cream-300/60 text-sm mt-1">
+          Bộ sưu tập cá nhân
+        </p>
+      </div>
+      <a href="/bookshelf" class="text-sm font-medium text-forest-600 dark:text-cream-300 hover:underline">
+        Xem tất cả →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {recentBooks.map(book => (
+        <BookCard
+          title={book.data.title}
+          author={book.data.author || ''}
+          cover={book.data.cover}
+          description={book.data.description || ''}
+          category={book.data.category || 'Khác'}
+          slug={bookSlug(book)}
+          status={book.data.status}
+          currentChapter={book.data.currentChapter}
+          totalChapters={book.data.totalChapters || 0}
+          readingTime={book.data.readingTime}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="bg-cream-200/50 dark:bg-[#252525] rounded-2xl p-8 sm:p-12 text-center">
+      <svg class="w-8 h-8 text-forest-600/30 dark:text-cream-300/30 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+      </svg>
+      <blockquote class="font-serif text-xl sm:text-2xl text-ink dark:text-cream-100 italic leading-relaxed max-w-2xl mx-auto mb-4">
+        "Một cuốn sách hay là sự kiện trong cuộc sống của tôi."
+      </blockquote>
+      <cite class="text-ink-lighter dark:text-cream-300/60 text-sm not-italic">
+        — Stendhal
+      </cite>
+    </div>
+  </section>
+</BaseLayout>
